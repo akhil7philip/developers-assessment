@@ -1,0 +1,181 @@
+{
+  "api_endpoints": {
+    "generate_remittances": {
+      "method": "POST",
+      "path": "/api/v1/generate-remittances-for-all-users",
+      "description": "Generate remittances for all users based on eligible work",
+      "sample_request": {
+        "query_params": {
+          "period_start": "2026-01-01",
+          "period_end": "2026-01-31"
+        }
+      },
+      "sample_response": {
+        "settlement": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "period_start": "2026-01-01",
+          "period_end": "2026-01-31",
+          "run_at": "2026-02-01T00:00:00.000Z",
+          "status": "COMPLETED",
+          "total_remittances_generated": 5
+        },
+        "remittances_created": 5,
+        "total_gross_amount": "4850.00",
+        "total_net_amount": "4650.00",
+        "message": "Successfully generated 5 remittances for period 2026-01-01 to 2026-01-31"
+      }
+    },
+    "list_all_worklogs": {
+      "method": "GET",
+      "path": "/api/v1/list-all-worklogs",
+      "description": "List all worklogs with filtering and amount information",
+      "sample_requests": [
+        {
+          "description": "Get all worklogs without filter",
+          "query_params": {},
+          "sample_response": {
+            "data": [
+              {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+                "worker_user_id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                "task_identifier": "TASK-001-SIMPLE",
+                "created_at": "2026-01-15T10:30:00.000Z",
+                "updated_at": "2026-01-15T10:30:00.000Z",
+                "total_amount": "500.00",
+                "is_remitted": false
+              },
+              {
+                "id": "2b3c4d5e-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
+                "worker_user_id": "8e7d6c5b-4a32-10fe-dcba-987654321098",
+                "task_identifier": "TASK-002-MONTH1",
+                "created_at": "2026-01-05T09:00:00.000Z",
+                "updated_at": "2026-01-05T09:00:00.000Z",
+                "total_amount": "1000.00",
+                "is_remitted": true
+              },
+              {
+                "id": "3c4d5e6f-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
+                "worker_user_id": "7d6c5b4a-3210-fedc-ba98-76543210fedc",
+                "task_identifier": "TASK-002-MONTH2",
+                "created_at": "2026-02-05T14:20:00.000Z",
+                "updated_at": "2026-02-05T14:20:00.000Z",
+                "total_amount": "300.00",
+                "is_remitted": false
+              }
+            ],
+            "count": 3
+          }
+        },
+        {
+          "description": "Get only UNREMITTED worklogs",
+          "query_params": {
+            "remittanceStatus": "UNREMITTED"
+          },
+          "sample_response": {
+            "data": [
+              {
+                "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+                "worker_user_id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                "task_identifier": "TASK-001-SIMPLE",
+                "created_at": "2026-01-15T10:30:00.000Z",
+                "updated_at": "2026-01-15T10:30:00.000Z",
+                "total_amount": "500.00",
+                "is_remitted": false
+              },
+              {
+                "id": "3c4d5e6f-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
+                "worker_user_id": "7d6c5b4a-3210-fedc-ba98-76543210fedc",
+                "task_identifier": "TASK-002-MONTH2",
+                "created_at": "2026-02-05T14:20:00.000Z",
+                "updated_at": "2026-02-05T14:20:00.000Z",
+                "total_amount": "300.00",
+                "is_remitted": false
+              }
+            ],
+            "count": 2
+          }
+        },
+        {
+          "description": "Get only REMITTED worklogs",
+          "query_params": {
+            "remittanceStatus": "REMITTED"
+          },
+          "sample_response": {
+            "data": [
+              {
+                "id": "2b3c4d5e-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
+                "worker_user_id": "8e7d6c5b-4a32-10fe-dcba-987654321098",
+                "task_identifier": "TASK-002-MONTH1",
+                "created_at": "2026-01-05T09:00:00.000Z",
+                "updated_at": "2026-01-05T09:00:00.000Z",
+                "total_amount": "1000.00",
+                "is_remitted": true
+              }
+            ],
+            "count": 1
+          }
+        },
+        {
+          "description": "Pagination example",
+          "query_params": {
+            "skip": 0,
+            "limit": 10
+          },
+          "sample_response": {
+            "data": [
+              {
+                "id": "4d5e6f7g-8h9i-0j1k-2l3m-n4o5p6q7r8s9",
+                "worker_user_id": "6c5b4a32-10fe-dcba-9876-543210fedcba",
+                "task_identifier": "TASK-003-FAILED",
+                "created_at": "2026-01-10T08:00:00.000Z",
+                "updated_at": "2026-01-10T08:00:00.000Z",
+                "total_amount": "1440.00",
+                "is_remitted": false
+              }
+            ],
+            "count": 10
+          }
+        }
+      ]
+    }
+  },
+  "sample_scenarios": {
+    "scenario_1_simple_happy_path": {
+      "description": "Worker logs 10 hours @ $50/hr, gets paid $500",
+      "worklog_amount": "500.00",
+      "remittance_status": "PENDING"
+    },
+    "scenario_2_retroactive_adjustment": {
+      "description": "Month 1 paid $1000, Month 2 has $200 deduction + $500 new work = $300 net",
+      "month_1_paid": "1000.00",
+      "month_2_gross": "500.00",
+      "month_2_adjustment": "-200.00",
+      "month_2_net": "300.00"
+    },
+    "scenario_3_failed_settlement_retry": {
+      "description": "Failed settlement of $1440 gets reconciled in next run",
+      "original_amount": "1440.00",
+      "original_status": "FAILED",
+      "reconciled_in_next_period": true
+    },
+    "scenario_4_partial_settlement": {
+      "description": "2 segments paid ($360), 1 segment unpaid ($270)",
+      "paid_amount": "360.00",
+      "unpaid_amount": "270.00",
+      "total_worklog_amount": "630.00"
+    },
+    "scenario_5_deleted_segment": {
+      "description": "Active segment $250 + deleted segment $150 (excluded) = $250 payable",
+      "active_segment": "250.00",
+      "deleted_segment_excluded": "150.00",
+      "actual_payable": "250.00"
+    }
+  },
+  "notes": {
+    "decimal_precision": "All monetary values use DECIMAL(10,2) for precision",
+    "double_payment_prevention": "RemittanceLine junction table prevents paying same work twice",
+    "soft_delete_support": "Time segments with deleted_at are excluded from calculations",
+    "idempotency": "Settlement runs can be executed multiple times safely",
+    "retroactive_adjustments": "Adjustments can be applied to previously settled work"
+  }
+}

@@ -1,0 +1,136 @@
+// WorkLog Settlement System Database Schema
+// Generated for developers-assessment
+
+// User table (existing)
+Table user {
+  id uuid [pk]
+  email varchar(255) [unique, not null]
+  hashed_password varchar [not null]
+  is_active boolean [not null, default: true]
+  is_superuser boolean [not null, default: false]
+  full_name varchar(255)
+
+  indexes {
+    email
+  }
+}
+
+// WorkLog - Container for all work against a task
+Table worklog {
+  id uuid [pk]
+  worker_user_id uuid [ref: > user.id, not null]
+  task_identifier varchar(255) [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    worker_user_id
+  }
+
+  Note: 'Represents all work done by a worker on a specific task. Can contain multiple time segments recorded over time.'
+}
+
+// TimeSegment - Individual work entry
+Table time_segment {
+  id uuid [pk]
+  worklog_id uuid [ref: > worklog.id, not null, on_delete: cascade]
+  hours_worked decimal(10,2) [not null]
+  hourly_rate decimal(10,2) [not null]
+  segment_date date [not null]
+  notes varchar(1000)
+  deleted_at timestamp
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    worklog_id
+    segment_date
+  }
+
+  Note: 'Individual time entry that can be independently questioned, removed, or adjusted. Soft-deleted via deleted_at for audit trail.'
+}
+
+// Adjustment - Retroactive deductions/additions
+Table adjustment {
+  id uuid [pk]
+  worklog_id uuid [ref: > worklog.id, not null, on_delete: cascade]
+  adjustment_type adjustment_type_enum [not null]
+  amount decimal(10,2) [not null]
+  reason varchar(500) [not null]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    worklog_id
+  }
+
+  Note: 'Retroactive financial adjustments applied to worklogs. Can be deductions or additions.'
+}
+
+// Settlement - Monthly settlement run record
+Table settlement {
+  id uuid [pk]
+  period_start date [not null]
+  period_end date [not null]
+  run_at timestamp [not null, default: `now()`]
+  status settlement_status_enum [not null]
+  total_remittances_generated integer [not null, default: 0]
+
+  Note: 'Groups all remittances from a single settlement run. Supports idempotent reruns.'
+}
+
+// Remittance - Payment to a worker
+Table remittance {
+  id uuid [pk]
+  settlement_id uuid [ref: > settlement.id, not null, on_delete: cascade]
+  worker_user_id uuid [ref: > user.id, not null]
+  gross_amount decimal(10,2) [not null]
+  adjustments_amount decimal(10,2) [not null, default: 0]
+  net_amount decimal(10,2) [not null]
+  status remittance_status_enum [not null, default: 'PENDING']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+  paid_at timestamp
+
+  indexes {
+    worker_user_id
+    status
+    settlement_id
+  }
+
+  Note: 'Payment record for a worker. Includes breakdown of amounts and payment status.'
+}
+
+// RemittanceLine - Junction table for audit trail
+Table remittance_line {
+  id uuid [pk]
+  remittance_id uuid [ref: > remittance.id, not null, on_delete: cascade]
+  time_segment_id uuid [ref: > time_segment.id]
+  adjustment_id uuid [ref: > adjustment.id]
+  amount decimal(10,2) [not null]
+
+  indexes {
+    remittance_id
+    time_segment_id
+    adjustment_id
+  }
+
+  Note: 'Tracks exactly which work items were paid in which remittance. Prevents double-payment.'
+}
+
+// Enums
+Enum adjustment_type_enum {
+  DEDUCTION
+  ADDITION
+}
+
+Enum settlement_status_enum {
+  COMPLETED
+  FAILED
+}
+
+Enum remittance_status_enum {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
