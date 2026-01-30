@@ -208,7 +208,7 @@ class SettlementService:
         # Calculate amounts
         gross_amount = sum(
             (segment.hours_worked * segment.hourly_rate) for segment in all_segments
-        )
+        ) or Decimal("0")
 
         adjustments_amount = Decimal("0")
         for adjustment in applicable_adjustments:
@@ -421,6 +421,12 @@ class WorkLogService:
         """
         List all worklogs with optional filtering by remittance status.
 
+        Performance notes:
+        - Caches remittance status to avoid duplicate calculations
+        - For very large datasets (10k+ worklogs), consider pushing the
+          remittance filter into SQL using a subquery/join to avoid
+          loading all worklogs into memory
+
         Args:
             session: Database session
             remittance_filter: Optional filter (REMITTED or UNREMITTED)
@@ -436,11 +442,17 @@ class WorkLogService:
         # Get all worklogs first
         all_worklogs = session.exec(query).all()
 
+        # Cache remittance status to avoid duplicate queries
+        # Maps worklog_id -> is_remitted (bool)
+        remittance_status_cache: dict[uuid.UUID, bool] = {}
+
         # Filter by remittance status if requested
         filtered_worklogs: list[WorkLog] = []
 
         for worklog in all_worklogs:
+            # Calculate remittance status once and cache it
             is_remitted = WorkLogService._is_worklog_remitted(session, worklog.id)
+            remittance_status_cache[worklog.id] = is_remitted
 
             if remittance_filter == WorkLogRemittanceFilter.REMITTED and is_remitted:
                 filtered_worklogs.append(worklog)
@@ -459,7 +471,8 @@ class WorkLogService:
         public_worklogs: list[WorkLogPublic] = []
         for worklog in paginated_worklogs:
             amount = WorkLogService._calculate_worklog_amount(session, worklog.id)
-            is_remitted = WorkLogService._is_worklog_remitted(session, worklog.id)
+            # Reuse cached remittance status instead of recalculating
+            is_remitted = remittance_status_cache[worklog.id]
 
             public_worklog = WorkLogPublic(
                 id=worklog.id,
@@ -501,7 +514,7 @@ class WorkLogService:
 
         gross_amount = sum(
             (segment.hours_worked * segment.hourly_rate) for segment in segments
-        )
+        ) or Decimal("0")
 
         # Calculate adjustments
         adjustments_query = select(Adjustment).where(
@@ -546,26 +559,23 @@ class WorkLogService:
         if not segments:
             return False
 
-        # Check if each segment has been paid
-        for segment in segments:
-            # Check if this segment is in a PAID remittance
-            paid_line_query = (
-                select(RemittanceLine)
-                .join(
-                    Remittance, col(RemittanceLine.remittance_id) == col(Remittance.id)
-                )
-                .where(
-                    and_(
-                        RemittanceLine.time_segment_id == segment.id,
-                        Remittance.status == RemittanceStatus.PAID,
-                    )
+        # Get all segment IDs for this worklog
+        segment_ids = {segment.id for segment in segments}
+
+        # Get all segment IDs that have been paid in a single query
+        # This avoids N+1 queries by fetching all paid segments at once
+        paid_segment_ids_query = (
+            select(RemittanceLine.time_segment_id)
+            .join(Remittance, col(RemittanceLine.remittance_id) == col(Remittance.id))
+            .where(
+                and_(
+                    col(RemittanceLine.time_segment_id).in_(segment_ids),
+                    Remittance.status == RemittanceStatus.PAID,
                 )
             )
-            paid_line = session.exec(paid_line_query).first()
+        )
+        paid_segment_ids = set(session.exec(paid_segment_ids_query).all())
 
-            if not paid_line:
-                # This segment hasn't been paid, so worklog is not fully remitted
-                return False
-
-        # All segments have been paid
-        return True
+        # Check if all segments have been paid
+        # A worklog is fully remitted only if ALL its segments are in paid_segment_ids
+        return segment_ids.issubset(paid_segment_ids)

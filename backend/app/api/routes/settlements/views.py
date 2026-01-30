@@ -38,7 +38,7 @@ def generate_remittances_for_all_users(
     - Finds all workers with unsettled time segments in the period
     - Calculates gross amounts from time segments
     - Applies retroactive adjustments from any period
-    - Rec onciles previously failed settlements
+    - Reconciles previously failed settlements
     - Creates a Settlement record with all Remittances
 
     The settlement run is idempotent - running it multiple times for the same

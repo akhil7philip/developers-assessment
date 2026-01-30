@@ -29,24 +29,26 @@ def test_parse_cors_invalid() -> None:
 
 def test_settings_check_default_secret_local() -> None:
     """Test _check_default_secret in local environment."""
-    settings = Settings(
-        PROJECT_NAME="Test",
-        POSTGRES_SERVER="localhost",
-        POSTGRES_USER="test",
-        POSTGRES_DB="test",
-        FIRST_SUPERUSER="test@example.com",
-        FIRST_SUPERUSER_PASSWORD="changethis",
-        SECRET_KEY="changethis",
-        POSTGRES_PASSWORD="changethis",
-        ENVIRONMENT="local",
-    )
-
-    # Should not raise, but warn
+    # Should not raise, but warn during object creation
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-        # Trigger validation
+        settings = Settings(
+            PROJECT_NAME="Test",
+            POSTGRES_SERVER="localhost",
+            POSTGRES_USER="test",
+            POSTGRES_DB="test",
+            FIRST_SUPERUSER="test@example.com",
+            FIRST_SUPERUSER_PASSWORD="changethis",
+            SECRET_KEY="changethis",
+            POSTGRES_PASSWORD="changethis",
+            ENVIRONMENT="local",
+        )
+        # Access SECRET_KEY to verify no exception is raised
         _ = settings.SECRET_KEY
-        assert len(w) >= 0  # May or may not warn depending on when validation runs
+        # Warning should be issued during object creation (in _enforce_non_default_secrets)
+        assert len(w) > 0
+        # Verify warning message contains expected text
+        assert any("changethis" in str(warning.message) for warning in w)
 
 
 def test_settings_check_default_secret_production() -> None:
@@ -63,4 +65,3 @@ def test_settings_check_default_secret_production() -> None:
             POSTGRES_PASSWORD="changethis",
             ENVIRONMENT="production",
         )
-

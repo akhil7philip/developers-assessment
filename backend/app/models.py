@@ -299,7 +299,7 @@ class WorkLog(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column_kwargs={"onupdate": datetime.utcnow},
+        sa_column_kwargs={"onupdate": lambda: datetime.utcnow()},
     )
 
     # Relationships
@@ -344,7 +344,7 @@ class TimeSegment(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column_kwargs={"onupdate": datetime.utcnow},
+        sa_column_kwargs={"onupdate": lambda: datetime.utcnow()},
     )
 
     # Relationships
@@ -444,7 +444,7 @@ class Remittance(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column_kwargs={"onupdate": datetime.utcnow},
+        sa_column_kwargs={"onupdate": lambda: datetime.utcnow()},
     )
     paid_at: datetime | None = Field(default=None, nullable=True)
 

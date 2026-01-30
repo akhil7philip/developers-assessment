@@ -6,8 +6,6 @@ import uuid
 from datetime import timedelta
 
 import jwt
-
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
@@ -29,7 +27,7 @@ def test_get_current_user_invalid_token(client: TestClient) -> None:
     assert "Could not validate credentials" in r.json()["detail"]
 
 
-def test_get_current_user_not_found(client: TestClient, db: Session) -> None:
+def test_get_current_user_not_found(client: TestClient) -> None:
     """Test get_current_user with non-existent user."""
     # Create a token for a non-existent user (use a valid UUID format)
     fake_user_id = uuid.uuid4()
@@ -88,4 +86,3 @@ def test_get_current_user_invalid_token_payload(client: TestClient) -> None:
     )
     assert r.status_code == 403
     assert "Could not validate credentials" in r.json()["detail"]
-

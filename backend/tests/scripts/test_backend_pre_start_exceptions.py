@@ -35,20 +35,22 @@ def test_init_exception() -> None:
         with (
             patch("app.backend_pre_start.Session", return_value=session_context_mock),
             patch.object(logger, "error") as mock_logger_error,
-            pytest.raises(Exception, match="Database connection failed"),
         ):
-            # This will retry but eventually raise the exception
-            init(engine_mock)
-            assert mock_logger_error.called
+            with pytest.raises(Exception, match="Database connection failed"):
+                # This will retry but eventually raise the exception
+                init(engine_mock)
+        # Assert logger was called after exception is raised
+        assert mock_logger_error.called
     else:
         # Test the original function directly (without retry)
         with (
             patch("app.backend_pre_start.Session", return_value=session_context_mock),
             patch.object(logger, "error") as mock_logger_error,
-            pytest.raises(Exception, match="Database connection failed"),
         ):
-            original_init(engine_mock)
-            mock_logger_error.assert_called_once()
+            with pytest.raises(Exception, match="Database connection failed"):
+                original_init(engine_mock)
+        # Assert logger was called after exception is raised
+        mock_logger_error.assert_called_once()
 
 
 def test_init_success() -> None:
@@ -71,4 +73,3 @@ def test_init_success() -> None:
         mock_logger_error.assert_not_called()
         # Verify exec was called
         session_mock.exec.assert_called_once()
-

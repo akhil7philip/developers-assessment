@@ -2,6 +2,7 @@
 Tests for initial_data.py
 """
 
+import runpy
 from unittest.mock import MagicMock, patch
 
 from app.initial_data import init, logger, main
@@ -34,14 +35,28 @@ def test_main() -> None:
 
 
 def test_main_entry_point() -> None:
-    """Test main entry point."""
+    """Test main entry point.
+
+    This verifies that when the module is run as a script (python -m app.initial_data),
+    the main() function gets executed. Since runpy.run_module with run_name='__main__'
+    actually executes the code, we need to mock the database dependencies.
+    """
+    import sys
+
+    # First, set up mocks for the database dependencies
     with (
-        patch("app.initial_data.main") as mock_main,
+        patch("app.core.db.init_db") as mock_init_db,
+        patch("app.core.db.engine"),
     ):
-        # Simulate running as script
-        import app.initial_data
+        # Remove the module from cache to get a fresh load
+        for module_name in list(sys.modules.keys()):
+            if module_name == "app.initial_data" or module_name.startswith(
+                "app.initial_data."
+            ):
+                del sys.modules[module_name]
 
-        if hasattr(app.initial_data, "__main__"):
-            app.initial_data.__main__()
-        mock_main.assert_not_called()  # This would be called if run as script
+        # Run the module as if it were the main script
+        runpy.run_module("app.initial_data", run_name="__main__")
 
+        # Verify init_db was called (main -> init -> init_db)
+        mock_init_db.assert_called_once()
