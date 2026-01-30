@@ -14,6 +14,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
+from sqlalchemy.sql.elements import ColumnElement
 from sqlmodel import Session, and_, col, select
 
 from app.models import (
@@ -99,6 +100,42 @@ class SettlementService:
         workers_with_failed = session.exec(failed_remittances_query).all()
         worker_ids.update(workers_with_failed)
 
+        # Also include workers with unapplied adjustments (even if no time segments)
+        # Subquery: adjustment IDs already applied in PAID remittances
+        applied_adjustment_ids_query = (
+            select(RemittanceLine.adjustment_id)
+            .join(Remittance, col(RemittanceLine.remittance_id) == col(Remittance.id))
+            .where(
+                and_(
+                    Remittance.status == RemittanceStatus.PAID,
+                    col(RemittanceLine.adjustment_id).is_not(None),
+                )
+            )
+        )
+        applied_adjustment_ids = session.exec(applied_adjustment_ids_query).all()
+
+        # Find workers with unapplied adjustments
+        # Build conditions list
+        adjustment_conditions = []
+        if applied_adjustment_ids:
+            adjustment_conditions.append(
+                col(Adjustment.id).not_in(applied_adjustment_ids)
+            )
+
+        unapplied_adjustments_query = select(WorkLog.worker_user_id).join(
+            Adjustment, col(Adjustment.worklog_id) == col(WorkLog.id)
+        )
+        if adjustment_conditions:
+            unapplied_adjustments_query = unapplied_adjustments_query.where(
+                and_(*adjustment_conditions)
+            )
+        unapplied_adjustments_query = unapplied_adjustments_query.distinct()
+
+        workers_with_unapplied_adjustments = session.exec(
+            unapplied_adjustments_query
+        ).all()
+        worker_ids.update(workers_with_unapplied_adjustments)
+
         remittances_created = 0
 
         # Generate remittance for each worker
@@ -153,8 +190,11 @@ class SettlementService:
             SettlementService._find_segments_from_failed_settlements(session, worker_id)
         )
 
-        # Combine all segments
-        all_segments = list(set(unsettled_segments + failed_settlement_segments))
+        # Combine all segments and deduplicate by ID (can't use set() on SQLModel objects)
+        segments_by_id = {}
+        for segment in unsettled_segments + failed_settlement_segments:
+            segments_by_id[segment.id] = segment
+        all_segments = list(segments_by_id.values())
 
         # Find applicable adjustments (not yet applied)
         applicable_adjustments = SettlementService._find_applicable_adjustments(
@@ -252,21 +292,23 @@ class SettlementService:
         )
         paid_segment_ids = session.exec(paid_segment_ids_query).all()
 
+        # Build query conditions
+        conditions: list[ColumnElement[bool] | bool] = [
+            WorkLog.worker_user_id == worker_id,
+            TimeSegment.segment_date >= period_start,
+            TimeSegment.segment_date <= period_end,
+            col(TimeSegment.deleted_at).is_(None),
+        ]
+
+        # Only add the paid segment filter if there are paid segments
+        if paid_segment_ids:
+            conditions.append(col(TimeSegment.id).not_in(paid_segment_ids))
+
         # Query unsettled segments
         query = (
             select(TimeSegment)
             .join(WorkLog, col(TimeSegment.worklog_id) == col(WorkLog.id))
-            .where(
-                and_(
-                    WorkLog.worker_user_id == worker_id,
-                    TimeSegment.segment_date >= period_start,
-                    TimeSegment.segment_date <= period_end,
-                    col(TimeSegment.deleted_at).is_(None),
-                    col(TimeSegment.id).not_in(paid_segment_ids)
-                    if paid_segment_ids
-                    else True,
-                )
-            )
+            .where(and_(*conditions))
         )
 
         return list(session.exec(query).all())
@@ -527,4 +569,3 @@ class WorkLogService:
 
         # All segments have been paid
         return True
-

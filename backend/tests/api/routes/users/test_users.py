@@ -103,14 +103,21 @@ def test_get_existing_user_current_user(client: TestClient, db: Session) -> None
 
 
 def test_get_existing_user_permissions_error(
-    client: TestClient, normal_user_token_headers: dict[str, str]
+    client: TestClient, normal_user_token_headers: dict[str, str], db: Session
 ) -> None:
+    # Create another user to try to access
+    username = random_email()
+    password = random_lower_string()
+    user_in = UserCreate(email=username, password=password)
+    other_user = crud.create_user(session=db, user_create=user_in)
+    
     r = client.get(
-        f"{settings.API_V1_STR}/users/{uuid.uuid4()}",
+        f"{settings.API_V1_STR}/users/{other_user.id}",
         headers=normal_user_token_headers,
     )
     assert r.status_code == 403
     assert r.json() == {"detail": "The user doesn't have enough privileges"}
+
 
 
 def test_create_user_existing_username(
