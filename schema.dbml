@@ -33,7 +33,7 @@ Table worklog {
 // TimeSegment - Individual work entry
 Table time_segment {
   id uuid [pk]
-  worklog_id uuid [ref: > worklog.id, not null, on_delete: cascade]
+  worklog_id uuid [ref: > worklog.id, not null]
   hours_worked decimal(10,2) [not null]
   hourly_rate decimal(10,2) [not null]
   segment_date date [not null]
@@ -53,7 +53,7 @@ Table time_segment {
 // Adjustment - Retroactive deductions/additions
 Table adjustment {
   id uuid [pk]
-  worklog_id uuid [ref: > worklog.id, not null, on_delete: cascade]
+  worklog_id uuid [ref: > worklog.id, not null]
   adjustment_type adjustment_type_enum [not null]
   amount decimal(10,2) [not null]
   reason varchar(500) [not null]
@@ -81,7 +81,7 @@ Table settlement {
 // Remittance - Payment to a worker
 Table remittance {
   id uuid [pk]
-  settlement_id uuid [ref: > settlement.id, not null, on_delete: cascade]
+  settlement_id uuid [ref: > settlement.id, not null]
   worker_user_id uuid [ref: > user.id, not null]
   gross_amount decimal(10,2) [not null]
   adjustments_amount decimal(10,2) [not null, default: 0]
@@ -103,7 +103,7 @@ Table remittance {
 // RemittanceLine - Junction table for audit trail
 Table remittance_line {
   id uuid [pk]
-  remittance_id uuid [ref: > remittance.id, not null, on_delete: cascade]
+  remittance_id uuid [ref: > remittance.id, not null]
   time_segment_id uuid [ref: > time_segment.id]
   adjustment_id uuid [ref: > adjustment.id]
   amount decimal(10,2) [not null]
