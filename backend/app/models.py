@@ -5,6 +5,7 @@ from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import DECIMAL, Index
+from sqlalchemy.sql import func
 from sqlmodel import Column, Field, Relationship, SQLModel
 
 
@@ -344,7 +345,7 @@ class TimeSegment(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column_kwargs={"onupdate": lambda: datetime.utcnow()},
+        sa_column_kwargs={"onupdate": func.now()},
     )
 
     # Relationships
@@ -444,7 +445,7 @@ class Remittance(SQLModel, table=True):
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,
         nullable=False,
-        sa_column_kwargs={"onupdate": lambda: datetime.utcnow()},
+        sa_column_kwargs={"onupdate": func.now()},
     )
     paid_at: datetime | None = Field(default=None, nullable=True)
 

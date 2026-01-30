@@ -8,7 +8,6 @@ from sqlmodel import Session
 from app import crud
 from app.core.config import settings
 from app.models import ItemCreate, UserCreate
-from tests.conftest import normal_user_token_headers
 from tests.utils.utils import random_email, random_lower_string
 
 
@@ -21,9 +20,7 @@ def test_get_items_non_superuser(
     from app.models import User
 
     # Get the normal user
-    user = db.exec(
-        select(User).where(User.email == settings.EMAIL_TEST_USER)
-    ).first()
+    user = db.exec(select(User).where(User.email == settings.EMAIL_TEST_USER)).first()
     assert user is not None
 
     item_in = ItemCreate(title="My Item", description="My description")
@@ -50,4 +47,3 @@ def test_get_items_non_superuser(
     data = r.json()
     # Should only see own items
     assert all(item["owner_id"] == str(user.id) for item in data["data"])
-

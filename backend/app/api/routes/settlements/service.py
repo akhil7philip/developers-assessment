@@ -442,17 +442,20 @@ class WorkLogService:
         # Get all worklogs first
         all_worklogs = session.exec(query).all()
 
-        # Cache remittance status to avoid duplicate queries
-        # Maps worklog_id -> is_remitted (bool)
-        remittance_status_cache: dict[uuid.UUID, bool] = {}
+        # Cache computed values to avoid duplicate calculations
+        # Maps worklog_id -> (is_remitted: bool, amount: Decimal)
+        worklog_cache: dict[uuid.UUID, tuple[bool, Decimal]] = {}
+
+        # Compute and cache values once per worklog
+        for worklog in all_worklogs:
+            is_remitted = WorkLogService._is_worklog_remitted(session, worklog.id)
+            amount = WorkLogService._calculate_worklog_amount(session, worklog.id)
+            worklog_cache[worklog.id] = (is_remitted, amount)
 
         # Filter by remittance status if requested
         filtered_worklogs: list[WorkLog] = []
-
         for worklog in all_worklogs:
-            # Calculate remittance status once and cache it
-            is_remitted = WorkLogService._is_worklog_remitted(session, worklog.id)
-            remittance_status_cache[worklog.id] = is_remitted
+            is_remitted, _ = worklog_cache[worklog.id]
 
             if remittance_filter == WorkLogRemittanceFilter.REMITTED and is_remitted:
                 filtered_worklogs.append(worklog)
@@ -467,12 +470,10 @@ class WorkLogService:
         # Apply pagination
         paginated_worklogs = filtered_worklogs[skip : skip + limit]
 
-        # Convert to public models with calculated amounts
+        # Convert to public models using cached values
         public_worklogs: list[WorkLogPublic] = []
         for worklog in paginated_worklogs:
-            amount = WorkLogService._calculate_worklog_amount(session, worklog.id)
-            # Reuse cached remittance status instead of recalculating
-            is_remitted = remittance_status_cache[worklog.id]
+            is_remitted, amount = worklog_cache[worklog.id]
 
             public_worklog = WorkLogPublic(
                 id=worklog.id,
