@@ -672,9 +672,6 @@ def test_failed_settlement_with_adjustments_not_double_applied(
     assert all_adj_lines[0].amount == all_adj_lines[1].amount  # Same amount
 
 
-# Missing Scenarios
-
-
 def test_cross_period_work_segments_outside_period(
     clean_session: Session, test_user: User
 ):

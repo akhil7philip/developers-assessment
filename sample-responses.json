@@ -12,17 +12,17 @@
       },
       "sample_response": {
         "settlement": {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "id": "b071096c-3ff2-4737-b670-21a1c57caa60",
           "period_start": "2026-01-01",
           "period_end": "2026-01-31",
-          "run_at": "2026-02-01T00:00:00.000Z",
+          "run_at": "2026-01-30T16:25:30.263902",
           "status": "COMPLETED",
-          "total_remittances_generated": 5
+          "total_remittances_generated": 1
         },
-        "remittances_created": 5,
-        "total_gross_amount": "4850.00",
-        "total_net_amount": "4650.00",
-        "message": "Successfully generated 5 remittances for period 2026-01-01 to 2026-01-31"
+        "remittances_created": 1,
+        "total_gross_amount": "2520.00",
+        "total_net_amount": "2320.00",
+        "message": "Successfully generated 1 remittances for period 2026-01-01 to 2026-01-31"
       }
     },
     "list_all_worklogs": {
@@ -32,38 +32,77 @@
       "sample_requests": [
         {
           "description": "Get all worklogs without filter",
-          "query_params": {},
+          "query_params": {
+            "skip": 0,
+            "limit": 100
+          },
           "sample_response": {
             "data": [
               {
-                "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
-                "worker_user_id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
                 "task_identifier": "TASK-001-SIMPLE",
-                "created_at": "2026-01-15T10:30:00.000Z",
-                "updated_at": "2026-01-15T10:30:00.000Z",
-                "total_amount": "500.00",
+                "id": "ec0d2195-c32e-4edf-b501-bd2010d07c39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.298126",
+                "updated_at": "2026-01-30T16:24:54.298134",
+                "total_amount": "500.0000",
                 "is_remitted": false
               },
               {
-                "id": "2b3c4d5e-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
-                "worker_user_id": "8e7d6c5b-4a32-10fe-dcba-987654321098",
                 "task_identifier": "TASK-002-MONTH1",
-                "created_at": "2026-01-05T09:00:00.000Z",
-                "updated_at": "2026-01-05T09:00:00.000Z",
-                "total_amount": "1000.00",
+                "id": "e5223db8-3ba2-4626-bdfe-2c20dd76fb39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.303904",
+                "updated_at": "2026-01-30T16:24:54.303910",
+                "total_amount": "800.0000",
                 "is_remitted": true
               },
               {
-                "id": "3c4d5e6f-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
-                "worker_user_id": "7d6c5b4a-3210-fedc-ba98-76543210fedc",
                 "task_identifier": "TASK-002-MONTH2",
-                "created_at": "2026-02-05T14:20:00.000Z",
-                "updated_at": "2026-02-05T14:20:00.000Z",
-                "total_amount": "300.00",
+                "id": "15f27f77-1c1a-4d97-85e1-0dff32fd8190",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.309248",
+                "updated_at": "2026-01-30T16:24:54.309252",
+                "total_amount": "500.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-003-FAILED",
+                "id": "5abb3df7-5409-452b-9c41-57458837378a",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.312978",
+                "updated_at": "2026-01-30T16:24:54.312984",
+                "total_amount": "1440.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-004-PARTIAL",
+                "id": "aa553606-fb3d-40f1-b545-dc93f70d8235",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.317222",
+                "updated_at": "2026-01-30T16:24:54.317227",
+                "total_amount": "630.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-005-MULTIMONTH",
+                "id": "042c12e7-cb78-4026-b1dd-9be0b4d389c7",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.320166",
+                "updated_at": "2026-01-30T16:24:54.320171",
+                "total_amount": "660.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-006-DELETED",
+                "id": "7f611ab2-0de3-4553-bcb0-012d55956108",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.321539",
+                "updated_at": "2026-01-30T16:24:54.321544",
+                "total_amount": "250.0000",
                 "is_remitted": false
               }
             ],
-            "count": 3
+            "count": 7
           }
         },
         {
@@ -74,25 +113,61 @@
           "sample_response": {
             "data": [
               {
-                "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
-                "worker_user_id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
                 "task_identifier": "TASK-001-SIMPLE",
-                "created_at": "2026-01-15T10:30:00.000Z",
-                "updated_at": "2026-01-15T10:30:00.000Z",
-                "total_amount": "500.00",
+                "id": "ec0d2195-c32e-4edf-b501-bd2010d07c39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.298126",
+                "updated_at": "2026-01-30T16:24:54.298134",
+                "total_amount": "500.0000",
                 "is_remitted": false
               },
               {
-                "id": "3c4d5e6f-7g8h-9i0j-1k2l-m3n4o5p6q7r8",
-                "worker_user_id": "7d6c5b4a-3210-fedc-ba98-76543210fedc",
                 "task_identifier": "TASK-002-MONTH2",
-                "created_at": "2026-02-05T14:20:00.000Z",
-                "updated_at": "2026-02-05T14:20:00.000Z",
-                "total_amount": "300.00",
+                "id": "15f27f77-1c1a-4d97-85e1-0dff32fd8190",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.309248",
+                "updated_at": "2026-01-30T16:24:54.309252",
+                "total_amount": "500.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-003-FAILED",
+                "id": "5abb3df7-5409-452b-9c41-57458837378a",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.312978",
+                "updated_at": "2026-01-30T16:24:54.312984",
+                "total_amount": "1440.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-004-PARTIAL",
+                "id": "aa553606-fb3d-40f1-b545-dc93f70d8235",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.317222",
+                "updated_at": "2026-01-30T16:24:54.317227",
+                "total_amount": "630.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-005-MULTIMONTH",
+                "id": "042c12e7-cb78-4026-b1dd-9be0b4d389c7",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.320166",
+                "updated_at": "2026-01-30T16:24:54.320171",
+                "total_amount": "660.0000",
+                "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-006-DELETED",
+                "id": "7f611ab2-0de3-4553-bcb0-012d55956108",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.321539",
+                "updated_at": "2026-01-30T16:24:54.321544",
+                "total_amount": "250.0000",
                 "is_remitted": false
               }
             ],
-            "count": 2
+            "count": 6
           }
         },
         {
@@ -103,12 +178,12 @@
           "sample_response": {
             "data": [
               {
-                "id": "2b3c4d5e-6f7g-8h9i-0j1k-l2m3n4o5p6q7",
-                "worker_user_id": "8e7d6c5b-4a32-10fe-dcba-987654321098",
                 "task_identifier": "TASK-002-MONTH1",
-                "created_at": "2026-01-05T09:00:00.000Z",
-                "updated_at": "2026-01-05T09:00:00.000Z",
-                "total_amount": "1000.00",
+                "id": "e5223db8-3ba2-4626-bdfe-2c20dd76fb39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.303904",
+                "updated_at": "2026-01-30T16:24:54.303910",
+                "total_amount": "800.0000",
                 "is_remitted": true
               }
             ],
@@ -124,16 +199,25 @@
           "sample_response": {
             "data": [
               {
-                "id": "4d5e6f7g-8h9i-0j1k-2l3m-n4o5p6q7r8s9",
-                "worker_user_id": "6c5b4a32-10fe-dcba-9876-543210fedcba",
-                "task_identifier": "TASK-003-FAILED",
-                "created_at": "2026-01-10T08:00:00.000Z",
-                "updated_at": "2026-01-10T08:00:00.000Z",
-                "total_amount": "1440.00",
+                "task_identifier": "TASK-001-SIMPLE",
+                "id": "ec0d2195-c32e-4edf-b501-bd2010d07c39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.298126",
+                "updated_at": "2026-01-30T16:24:54.298134",
+                "total_amount": "500.0000",
                 "is_remitted": false
+              },
+              {
+                "task_identifier": "TASK-002-MONTH1",
+                "id": "e5223db8-3ba2-4626-bdfe-2c20dd76fb39",
+                "worker_user_id": "681bf05d-761a-41b2-b543-8fe3d907ffdf",
+                "created_at": "2026-01-30T16:24:54.303904",
+                "updated_at": "2026-01-30T16:24:54.303910",
+                "total_amount": "800.0000",
+                "is_remitted": true
               }
             ],
-            "count": 10
+            "count": 7
           }
         }
       ]
